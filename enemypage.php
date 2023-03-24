@@ -2,8 +2,8 @@
 
 $host = 'localhost';
 $db   = 'wflootcalc';
-$user = 'root';
-$pass = '';
+$user = 'bit_academy';
+$pass = 'bit_academy';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -19,11 +19,11 @@ try {
 }
 
 $stmt = $db->prepare("
-    SELECT `faction`.name as 'faction', `enemy`.name as 'enemy', `loot`.name as 'loot', `enemy-loot`.chance, `enemy-loot`.amount
+    SELECT `faction`.name as 'faction', `enemy`.name as 'enemy', `loot`.name as 'loot', `enemy_loot`.chance, `enemy_loot`.amount
     FROM `WFlootcalc`.`faction`
     INNER JOIN `WFlootcalc`.`enemy` ON `faction`.`id` = `enemy`.`faction_id`
-    INNER JOIN `WFlootcalc`.`enemy-loot` ON `enemy`.`id` = `enemy-loot`.`enemy_id`
-    INNER JOIN `WFlootcalc`.`loot` ON `enemy-loot`.`loot_id` = `loot`.`id`
+    INNER JOIN `WFlootcalc`.`enemy_loot` ON `enemy`.`id` = `enemy_loot`.`enemy_id`
+    INNER JOIN `WFlootcalc`.`loot` ON `enemy_loot`.`loot_id` = `loot`.`id`
     WHERE `enemy`.id = :id;
 ");
 

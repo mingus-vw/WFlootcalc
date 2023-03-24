@@ -2,8 +2,8 @@
 
 $host = 'localhost';
 $db   = 'wflootcalc';
-$user = 'root';
-$pass = '';
+$user = 'bit_academy';
+$pass = 'bit_academy';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -36,10 +36,11 @@ $stmt->execute(['id' => 1]);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faction: <?= $_GET['id']?></title>
+    <title>Factions</title>
 </head>
 <body>
-    <h1>Faction: <?= $_GET['id'] ?></h1>
+<button onclick="location.href='index.php'">Go to main page</button>
+    <h1>Factions:</h1>
     <table>
         <thead>
             <tr>
@@ -47,12 +48,14 @@ $stmt->execute(['id' => 1]);
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $stmt->fetch()) : ?>
             <tr>
-                <td><?= $row['name'] ?></td>
+                <td><a href="?id=1">Grineer</a></td>
             </tr>
-            <?php endwhile; ?>
+            <tr>
+                <td><a href="?id=2">Corpus</a></td>
+            </tr>
+            <tr>
+                <td><a href="?id=3">Infested</a></td>
+            </tr>
         </tbody>
     </table>
-</body>
-</html>

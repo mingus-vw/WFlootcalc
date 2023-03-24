@@ -2,8 +2,8 @@
 
 $host = 'localhost';
 $db   = 'wflootcalc';
-$user = 'root';
-$pass = '';
+$user = 'bit_academy';
+$pass = 'bit_academy';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -26,6 +26,7 @@ $stmt = $db->prepare("
 
 $stmt->execute(['id' => $_GET['id']]);
 
+$row = $stmt->fetch(); // fetch a single row, assuming the id is unique
 
 ?>
 <!DOCTYPE html>
@@ -34,27 +35,24 @@ $stmt->execute(['id' => $_GET['id']]);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loot: <?= $_GET['id'] ?></title>
+    <title>Loot: <?= $row['loot'] ?></title>
 
 </head>
 <body>
-    <h1>Loot: <?= $_GET['id'] ?></h1>
-        <table>
-    <thead>
-    <tr>
-         <th>Loot Name</th>
-        <th>Loot Description</th>
-    </tr>
-</thead>
-    <tbody>
-    <?php while ($row = $stmt->fetch()) : ?>
-    <tr>
-        <td><?= $row['loot'] ?></td>
-        <td><?= $row['description'] ?></td>
-    </tr>
-    <?php endwhile; ?>
-</tbody>
-
+    <h1>Loot: <?= $row['loot'] ?></h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Loot Name</th>
+                <th>Loot Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?= $row['loot'] ?></td>
+                <td><?= $row['description'] ?></td>
+            </tr>
+        </tbody>
     </table>
 </body>
 </html>

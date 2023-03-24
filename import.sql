@@ -26,7 +26,7 @@ CREATE TABLE `WFlootcalc`.`loot` (
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `WFlootcalc`.`enemy-loot` (
+CREATE TABLE `WFlootcalc`.`enemy_loot` (
     `enemy_id` INT NOT NULL,
     `loot_id` INT NOT NULL,
     `chance` INT NOT NULL,
@@ -66,18 +66,18 @@ INSERT INTO `WFlootcalc`.`enemy` (`name`, `stats`, `faction_id`) VALUES ('Infest
 INSERT INTO `WFlootcalc`.`enemy` (`name`, `stats`, `faction_id`) VALUES ('Infested ancient disruptor', 'stats 10', 3);
 INSERT INTO `WFlootcalc`.`enemy` (`name`, `stats`, `faction_id`) VALUES ('Infested juggernaut', 'stats 100', 3);
 
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (1, 8, 23, 2);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (2, 8, 23, 2);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (3, 8, 23, 2);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (4, 11, 100, 10);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (5, 11, 100, 10);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (6, 11, 100, 10);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (7, 3, 50, 1);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (8, 3, 50, 1);
-INSERT INTO `WFlootcalc`.`enemy-loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (9, 3, 50, 1);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (1, 8, 25, 5);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (2, 8, 25, 5);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (3, 8, 25, 5);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (4, 11, 100, 10);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (5, 11, 100, 10);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (6, 11, 100, 10);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (7, 3, 50, 1);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (8, 3, 50, 1);
+INSERT INTO `WFlootcalc`.`enemy_loot` (`enemy_id`, `loot_id`, `chance`, `amount`) VALUES (9, 3, 50, 1);
 
-SELECT `faction`.name as 'faction', `enemy`.name as 'enemy', `loot`.name as 'loot', `enemy-loot`.chance, `enemy-loot`.amount
+SELECT `faction`.name as 'faction', `enemy`.name as 'enemy', `loot`.name as 'loot', `enemy_loot`.chance, `enemy_loot`.amount
 FROM `WFlootcalc`.`faction`
 INNER JOIN `WFlootcalc`.`enemy` ON `faction`.`id` = `enemy`.`faction_id`
-INNER JOIN `WFlootcalc`.`enemy-loot` ON `enemy`.`id` = `enemy-loot`.`enemy_id`
-INNER JOIN `WFlootcalc`.`loot` ON `enemy-loot`.`loot_id` = `loot`.`id`;
+INNER JOIN `WFlootcalc`.`enemy_loot` ON `enemy`.`id` = `enemy_loot`.`enemy_id`
+INNER JOIN `WFlootcalc`.`loot` ON `enemy_loot`.`loot_id` = `loot`.`id`;
