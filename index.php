@@ -15,7 +15,7 @@
     <nav class="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-100">
         <div class="container flex flex-wrap items-center justify-between mx-auto">
             <a href="index.php" class="flex items-center">
-                <img src="https://n9e5v4d8.ssl.hwcdn.net/images/longlanding/lotusIcon.jpg" class="h-6 mr-3 sm:h-9"
+                <img src="img/logo.png" class="h-6 mr-3 sm:h-9"
                     alt="wflogo" />
                 <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Warframe
                     Calculator</span>
@@ -46,6 +46,9 @@
                         <a href="about.php"
                             class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
                     </li>
+                    <li>
+                        <a href="login.php"
+                            class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login/Sign up</a>
                 </ul>
             </div>
         </div>
@@ -92,6 +95,7 @@
                 <option value="8">Ancient Disruptor</option>
                 <option value="9">Juggernaut</option>
             </select>
+            
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" value="" class="sr-only peer"></input>
                 <div
@@ -99,16 +103,32 @@
                 </div>
                 <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Randomized Enemies</span>
             </label>
+
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="doubleDropsToggle" value="" class="sr-only peer"></input>
+                <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                </div>
+                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Show Double Drops</span>
+            </label>
     </div>
 
     <div class="flex justify-center pt-3">
         <input type="submit" name="submit" value="Calculate loot"
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"></input>
     </div>
+
+    <!-- Normal drop chart --> 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <canvas id="myChart" height="50"></canvas>
+
+    <!-- Double drop chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <canvas id="myDoubledChart" height="50"></canvas>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.4/flowbite.min.js"></script>
-    <footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 fixed bottom-0 w-full">
+    <footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 sticky bottom-0 w-full">
         <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
             <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/"
                     class="hover:underline">Flowbite™</a>. All Rights Reserved.
@@ -131,88 +151,95 @@
     </footer>
 
     <?php
-$host = 'localhost';
-$db   = 'wflootcalc';
-$user = 'bit_academy';
-$pass = 'bit_academy';
-$charset = 'utf8mb4';
+    $host = 'localhost';
+    $db   = 'wflootcalc';
+    $user = 'bit_academy';
+    $pass = 'bit_academy';
+    $charset = 'utf8mb4';
 
 // Set up the database connection
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
-];
+    ];
 
-try {
-    $conn = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+    try {
+        $conn = new PDO($dsn, $user, $pass, $options);
+    } catch (PDOException $e) {
+        die("Connection failed: " . $e->getMessage());
+    }
+
+
 
 // Check if the form was submitted
-$enemy_names = [];
-$loot_amount = [];
-if (isset($_POST["submit"])) {
-    // Get the selected enemy IDs
-    $enemy1_id = $_POST["enemy1"];
-    $enemy2_id = $_POST["enemy2"];
-    $enemy3_id = $_POST["enemy3"];
+    $enemy_names = [];
+    $loot_amount = [];
+    if (isset($_POST["submit"])) {
+        // Get the selected enemy IDs
+        $enemy1_id = $_POST["enemy1"];
+        $enemy2_id = $_POST["enemy2"];
+        $enemy3_id = $_POST["enemy3"];
 
-    // Build a comma-separated string of enemy IDs
-    $enemy_ids = implode(',', [$enemy1_id, $enemy2_id, $enemy3_id]);
+        // Build a comma-separated string of enemy IDs
+        $enemy_ids = implode(',', [$enemy1_id, $enemy2_id, $enemy3_id]);
 
-    // Select the items dropped by the enemies
-    $sql = "SELECT l.id, l.name, l.description, el.amount, el.chance FROM loot l JOIN enemy_loot el ON l.id = el.loot_id WHERE el.enemy_id IN (:enemy1, :enemy2, :enemy3)";
+        // Select the items dropped by the enemies
+        $sql = "SELECT l.id, l.name, l.description, el.amount, el.chance FROM loot l JOIN enemy_loot el ON l.id = el.loot_id WHERE el.enemy_id IN (:enemy1, :enemy2, :enemy3)";
 
-    // Prepare the query
-    $stmt = $conn->prepare($sql);
+        // Prepare the query
+        $stmt = $conn->prepare($sql);
 
-    // Bind parameters to the prepared statement
-    $stmt->bindParam(':enemy1', $enemy1_id);
-    $stmt->bindParam(':enemy2', $enemy2_id);
-    $stmt->bindParam(':enemy3', $enemy3_id);
+        // Bind parameters to the prepared statement
+        $stmt->bindParam(':enemy1', $enemy1_id);
+        $stmt->bindParam(':enemy2', $enemy2_id);
+        $stmt->bindParam(':enemy3', $enemy3_id);
 
-    // Execute the query
-    $stmt->execute();
+        // Execute the query
+        $stmt->execute();
 
-    // Fetch the results
-    $result = $stmt->fetchAll();
+        // Fetch the results
+        $result = $stmt->fetchAll();
 
-    if ($result) {
-        // Print the table of dropped items
-        $total_loot_amount = 0;
-        for ($i = 0; $i < 3; $i++) {
-            foreach ($result as $row) {
-                $enemy_names[] = $row["name"];
-                $random_getal_tussen_0_en_100 = rand(0, 100);
-                if ($random_getal_tussen_0_en_100 <= $row["chance"]) {
-                    $loot_amount[] = $row["amount"];
-                    $total_loot_amount += $row["amount"]; // add the amount to the total
-                } else {
-                    $loot_amount[] = 0;
+        if ($result) {
+            // Print the table of dropped items
+            $total_loot_amount = 0;
+            for ($i = 0; $i < 3; $i++) {
+                foreach ($result as $row) {
+                    $enemy_names[] = $row["name"];
+                    $random_getal_tussen_0_en_100 = rand(0, 100);
+                    if ($random_getal_tussen_0_en_100 <= $row["chance"]) {
+                        $loot_amount[] = $row["amount"];
+                        $total_loot_amount += $row["amount"]; // add the amount to the total
+                    } else {
+                        $loot_amount[] = 0;
+                    }
                 }
             }
+            if (count($enemy_names) >= 3 && count(array_unique($enemy_names)) == 1) {
+                $total_loot_amount *= count($enemy_names);
+            }
+        } else {
+            echo "Error: " . $stmt->errorInfo()[2];
         }
-        if (count($enemy_names) >= 3 && count(array_unique($enemy_names)) == 1) {
-            $total_loot_amount *= count($enemy_names);
-        }
-    } else {
-        echo "Error: " . $stmt->errorInfo()[2];
     }
-}
-?>
-
-
-
-
-    <script>
+    ?>
+<script src="script.js"></script>
+<script>
     const ctx = document.getElementById('myChart');
+    const doubledCtx = document.getElementById('myDoubledChart');
+    const doubleDropsToggle = document.getElementById('doubleDropsToggle');
+
     const data = [<?= implode(',', $loot_amount) ?>];
+    const doubledLootAmount = data.map(value => value * 2); // Create a new array with doubled values
+
     if (data.length == 0) {
         ctx.style.display = 'none';
+        doubledCtx.style.display = 'none';
     }
+
+    // Generate the original chart
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -229,6 +256,41 @@ if (isset($_POST["submit"])) {
                     beginAtZero: true
                 }
             }
+        }
+    });
+
+    // Function to generate the second chart (doubled loot)
+    function createDoubledChart() {
+        new Chart(doubledCtx, {
+            type: 'bar',
+            data: {
+                labels: [<?php echo "'" . implode("','", array_unique($enemy_names)) . "'" ?>],
+                datasets: [{
+                    label: 'Doubled Amount of loot',
+                    data: doubledLootAmount,
+                    borderWidth: 1,
+                    backgroundColor: 'rgba(255, 178, 0, 0.43)', // Different color for differentiation
+                    borderColor: 'rgba(255, 155, 0, 1)',       // Different color for the border
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Toggle the visibility of the second chart based on the checkbox state
+    doubleDropsToggle.addEventListener('change', function() {
+        if (this.checked) {
+            doubledCtx.style.display = 'block'; // Show the canvas
+            createDoubledChart(); // Generate the second chart when toggled on
+        } else {
+            doubledCtx.style.display = 'none';  // Hide the canvas when unchecked
+            doubledCtx.getContext('2d').clearRect(0, 0, doubledCtx.width, doubledCtx.height); // Clear the canvas when hidden
         }
     });
 
@@ -264,12 +326,19 @@ if (isset($_POST["submit"])) {
 
     const checkbox = document.querySelector('input[type="checkbox"]');
     checkbox.addEventListener('change', () => {
-        console.log(checkbox)
+        console.log(checkbox);
         if (checkbox.checked) {
             randomizeEnemies();
         }
     });
-    </script>
+
+    function toggleForms() {
+        document.getElementById('loginForm').classList.toggle('active');
+        document.getElementById('signupForm').classList.toggle('active');
+    }
+</script>
+
+
 </body>
 
 </html>

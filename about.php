@@ -15,7 +15,7 @@
     <nav class="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-100 pb-10">
         <div class="container flex flex-wrap items-center justify-between mx-auto">
             <a href="index.php" class="flex items-center">
-                <img src="https://n9e5v4d8.ssl.hwcdn.net/images/longlanding/lotusIcon.jpg" class="h-6 mr-3 sm:h-9"
+                <img src="img/logo.png" class="h-6 mr-3 sm:h-9"
                     alt="wflogo" />
                 <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Warframe
                     Calculator</span>
@@ -47,6 +47,9 @@
                         <a href="about.php"
                             class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
                     </li>
+                    <li>
+                        <a href="login.php"
+                            class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login/Sign up</a>
                 </ul>
             </div>
         </div>
@@ -55,7 +58,7 @@
     <div class="flex justify-center">
         <div class="container mx-auto max-width-960 px-4">
             <div class="flex justify-center">
-                <img src="https://n9e5v4d8.ssl.hwcdn.net/images/longlanding/lotusIcon.jpg" class="w-12 h-12 mt-8"
+                <img src="img/logo.png" class="h-6 mr-3 sm:h-9"
                     alt="wflogo" />
             </div>
             <div class="flex justify-center">
@@ -103,7 +106,7 @@
         <footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 fixed bottom-0 w-full">
             <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
                 <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a
-                        href="https://flowbite.com/" class="hover:underline">Flowbite™</a>. All Rights Reserved.
+                        href="https://flowbite.com/" class="hover:underline">Made with Flowbite™</a>.
                 </span>
                 <ul
                     class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">

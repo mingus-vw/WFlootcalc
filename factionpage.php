@@ -13,21 +13,50 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 try {
-     $db = new PDO($dsn, $user, $pass, $options);
+    $db = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-     throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 
-$stmt = $db->prepare("
-    SELECT `faction`.name as 'faction', `enemy`.name as 'enemy', `loot`.name as 'loot', `enemy_loot`.chance, `enemy_loot`.amount
-    FROM `WFlootcalc`.`faction`
-    INNER JOIN `WFlootcalc`.`enemy` ON `faction`.`id` = `enemy`.`faction_id`
-    INNER JOIN `WFlootcalc`.`enemy_loot` ON `enemy`.`id` = `enemy_loot`.`enemy_id`
-    INNER JOIN `WFlootcalc`.`loot` ON `enemy_loot`.`loot_id` = `loot`.`id`
-    WHERE `faction`.id = :id;
-");
+// Handle form submissions for adding and deleting enemies
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add_enemy'])) {
+        // Add enemy
+        $name = $_POST['enemy_name'];
+        $stats = $_POST['enemy_stats'];
+        $faction_id = $_POST['faction_id'];
 
-$stmt->execute(['id' => 1]);
+        $stmt = $db->prepare("INSERT INTO enemy (name, stats, faction_id) VALUES (?, ?, ?)");
+        $stmt->execute([$name, $stats, $faction_id]);
+    } elseif (isset($_POST['delete_enemy'])) {
+        // Delete enemy
+        $enemy_id = $_POST['enemy_id'];
+
+        // Delete enemy loot associations first
+        $stmt = $db->prepare("DELETE FROM enemy_loot WHERE enemy_id = ?");
+        $stmt->execute([$enemy_id]);
+
+        // Delete enemy
+        $stmt = $db->prepare("DELETE FROM enemy WHERE id = ?");
+        $stmt->execute([$enemy_id]);
+    }
+}
+
+// Fetch faction names
+$factions_stmt = $db->query("SELECT id, name FROM faction");
+$factions = $factions_stmt->fetchAll();
+
+// Fetch loot items
+$loot_stmt = $db->query("SELECT id, name FROM loot");
+$loot_items = $loot_stmt->fetchAll();
+
+// Fetch enemies for display
+$enemies_stmt = $db->query("
+    SELECT enemy.id, enemy.name, enemy.stats, faction.name AS faction_name
+    FROM enemy
+    INNER JOIN faction ON enemy.faction_id = faction.id
+");
+$enemies = $enemies_stmt->fetchAll();
 
 ?>
 <!DOCTYPE html>
@@ -47,7 +76,7 @@ $stmt->execute(['id' => 1]);
     <nav class="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-100 pb-3">
         <div class="container flex flex-wrap items-center justify-between mx-auto">
             <a href="index.php" class="flex items-center">
-                <img src="https://n9e5v4d8.ssl.hwcdn.net/images/longlanding/lotusIcon.jpg" class="h-6 mr-3 sm:h-9"
+                <img src="img/logo.png" class="h-6 mr-3 sm:h-9"
                     alt="wflogo" />
                 <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Warframe
                     Calculator</span>
@@ -79,6 +108,9 @@ $stmt->execute(['id' => 1]);
                         <a href="about.php"
                             class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
                     </li>
+                    <li>
+                        <a href="login.php"
+                            class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Login/Sign up</a>
                 </ul>
             </div>
         </div>
@@ -90,7 +122,7 @@ $stmt->execute(['id' => 1]);
             <!-- Item 1 -->
             <div class="hidden duration-800 ease-in-out" data-carousel-item>
                 <a href="https://warframe.fandom.com/wiki/Grineer">
-                    <img src="FactionsGrineer.webp"
+                    <img src="img/FactionsGrineer.webp"
                         class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="grineer">
                     <div
                         class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
@@ -102,7 +134,7 @@ $stmt->execute(['id' => 1]);
             <!-- Item 2 -->
             <div class="hidden duration-800 ease-in-out" data-carousel-item>
                 <a href="https://warframe.fandom.com/wiki/Corpus">
-                    <img src="FactionsCorpus.webp"
+                    <img src="img/FactionsCorpus.webp"
                         class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="corpus">
                     <div
                         class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
@@ -114,7 +146,7 @@ $stmt->execute(['id' => 1]);
             <!-- Item 3 -->
             <div class="hidden duration-800 ease-in-out" data-carousel-item>
                 <a href="https://warframe.fandom.com/wiki/Infested">
-                    <img src="FactionsInfested.webp"
+                    <img src="img/FactionsInfested.webp"
                         class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="infested">
                     <div
                         class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
@@ -125,16 +157,56 @@ $stmt->execute(['id' => 1]);
             </div>
             <!-- Item 4 -->
             <div class="hidden duration-800 ease-in-out" data-carousel-item>
-                <a href="https://warframe.fandom.com/wiki/Factions">
-                    <img src="FactionsTBA.webp"
-                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="infested">
+                <a href="https://warframe.fandom.com/wiki/Orokin">
+                    <img src="img/FactionsOrokin.webp"
+                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="orokin">
                     <div
                         class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
-                        <h2>To be Added:</h2>
-                        <p>Sentients, Orokin and Narmer.</p>
+                        <h2>The Orokin</h2>
+                        <p>The highly revered Orokin civilization built sovereignty on a culture of art, technology and architecture.</p>
                     </div>
                 </a>
             </div>
+            <!-- Item 5 -->
+            <div class="hidden duration-800 ease-in-out" data-carousel-item>
+                <a href="https://warframe.fandom.com/wiki/Tenno">
+                    <img src="img/FactionsTenno.webp"
+                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="tenno">
+                    <div
+                        class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
+                        <h2>The Tenno</h2>
+                        <p>Awakening from a deep slumber to a hostile world, the Tenno know little of themselves.</p>
+                    </div>
+                </a>
+            </div>
+            <!-- Item 6 -->
+            <div class="hidden duration-800 ease-in-out" data-carousel-item>
+                <a href="https://warframe.fandom.com/wiki/Sentient">
+                    <img src="img/FactionsSentient.webp"
+                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="sentient">
+                    <div
+                        class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
+                        <h2>The Sentient</h2>
+                        <p>Whispers from the Old War have begun to escape the deepest shadows. What terrible secret calls out to be discovered?</p>	
+                    </div>
+                </a>
+            </div>
+            <!-- Item 7 -->
+            <div class="hidden duration-800 ease-in-out" data-carousel-item>
+                <a href="https://warframe.fandom.com/wiki/Narmer">
+                    <img src="img/FactionsNarmer.webp"
+                        class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="narmer">
+                    <div
+                        class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white font-bold text-lg">
+                        <h2>The Narmer</h2>
+                        <p>All... as one.</p>
+                    </div>
+                </a>
+            </div>
+
+
+
+
             <!-- Slider indicators -->
             <div class="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
                 <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1"
@@ -145,6 +217,12 @@ $stmt->execute(['id' => 1]);
                     data-carousel-slide-to="2"></button>
                 <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4"
                     data-carousel-slide-to="3"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 5"
+                    data-carousel-slide-to="4"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 6"
+                    data-carousel-slide-to="5"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 7"
+                    data-carousel-slide-to="6"></button>
             </div>
             <!-- Slider controls -->
             <button type="button"
@@ -173,11 +251,89 @@ $stmt->execute(['id' => 1]);
                 </span>
             </button>
         </div>
+<!-- Navigation omitted for brevity -->
+
+<h1 class="text-xl font-semibold mb-10 mt-10 text-center">Manage Enemies</h1>
+
+<!-- Form to add new enemy -->
+<form action="factionpage.php" method="post" class="max-w-md mx-auto p-6 bg-gray-100 shadow-md rounded-lg border border-gray-300">
+    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Add New Enemy</h2>
+    
+    <div class="mb-6">
+        <label for="enemy_name" class="block text-sm font-medium text-gray-800">Enemy Name</label>
+        <input type="text" id="enemy_name" name="enemy_name" required 
+            class="mt-1 block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-150 ease-in-out">
+    </div>
+    
+    <div class="mb-6">
+        <label for="enemy_stats" class="block text-sm font-medium text-gray-800">Enemy Stats</label>
+        <input type="text" id="enemy_stats" name="enemy_stats" required 
+            class="mt-1 block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-800 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-150 ease-in-out">
+    </div>
+    
+    <div class="mb-6">
+        <label for="faction_id" class="block text-sm font-medium text-gray-800">Faction</label>
+        <select id="faction_id" name="faction_id" required 
+            class="mt-1 block w-full border border-gray-300 rounded-lg p-3 bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-150 ease-in-out">
+            <option value="" disabled selected>Select a faction</option>
+            <?php foreach ($factions as $faction) : ?>
+                <option value="<?= htmlspecialchars($faction['id']) ?>"><?= htmlspecialchars($faction['name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <button type="submit" name="add_enemy" class="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition duration-150 ease-in-out">
+        Add Enemy
+    </button>
+</form>
+
+
+
+
+<!-- Display existing enemies -->
+<h2 class="text-xl font-semibold mb-10 mt-10 text-center">Existing Enemies</h2>
+<table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+        <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faction</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+        <?php foreach ($enemies as $enemy) : ?>
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($enemy['id']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($enemy['name']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($enemy['stats']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($enemy['faction_name']) ?></td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <?php if ($enemy['is_favored']) : ?>
+                        <form action="factionpage.php" method="post" class="inline">
+                            <input type="hidden" name="enemy_id" value="<?= htmlspecialchars($enemy['id']) ?>">
+                            <button type="submit" name="unfavorite_enemy" class="px-4 py-2 bg-yellow-500 text-white rounded-md">Unfavorite</button>
+                            <button type="submit" name="delete_enemy" class="px-4 py-2 bg-red-500 text-white rounded-md" disabled>Delete</button>
+                        </form>
+                    <?php else : ?>
+                        <form action="factionpage.php" method="post" class="inline">
+                            <input type="hidden" name="enemy_id" value="<?= htmlspecialchars($enemy['id']) ?>">
+                            <button type="submit" name="favorite_enemy" class="px-4 py-2 bg-blue-500 text-white rounded-md">Favorite</button>
+                            <button type="submit" name="delete_enemy" class="px-4 py-2 bg-red-500 text-white rounded-md">Delete</button>
+                        </form>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
 
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.4/flowbite.min.js"></script>
 </body>
-<footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 fixed bottom-0 w-full">
+<footer class="bg-white rounded-lg shadow m-4 dark:bg-gray-800 sticky bottom-0 w-full">
     <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
         <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/"
                 class="hover:underline">Flowbite™</a>. All Rights Reserved.
