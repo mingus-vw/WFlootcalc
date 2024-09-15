@@ -1,7 +1,7 @@
 
 # Backend Endproject
 
-Welcome to my Warframe loot calculator, my endproject! The project is a simple calculator for the free space ninja game called Warframe. Within you will find the option to calculate the drops of 3 selected enemies!
+Welcome to my Warframe loot calculator, my endproject! The project is a simple calculator for the free space ninja game called Warframe. Within you will find the option to calculate the drops of 3 selected enemies, view the rates of loot dropped when you have a resource booster, add, remove and favorite new enemies and login/logout/register!
 
 
 ## Installation
